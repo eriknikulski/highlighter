@@ -1,0 +1,9 @@
+.idea
+venv
+
+highlights/*
+images
+misc
+models/saves/*
+tmp/*
+videos/*
