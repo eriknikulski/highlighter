@@ -25,7 +25,7 @@ def rename_images(root_path):
 
 def extract_images(path_in, path_out, config):
     loglevel = ['-loglevel', 'fatal'] if not config['verbose'] else []
-    subprocess.run([config['ffmpeg'],
+    subprocess.run(['ffmpeg',
                     '-i', path_in,
                     '-r', '1',
                     '-q:v', '2',
@@ -69,40 +69,3 @@ def delete_all(path):
         os.remove(fpath)
         count += 1
     return count
-
-
-def cut_videos(source, targets, config):
-    video_name = source[source.rfind('/') + 1:]
-    extension_point = video_name.rfind('.')
-    extension = video_name[extension_point:]
-    video_name = video_name[:extension_point]
-
-    filenames = []
-    loglevel = ['-loglevel', 'fatal'] if not config['verbose'] else []
-
-    for index, target in enumerate(targets):
-        filename = video_name + '_' + str(index) + extension
-        filenames.append(filename)
-        subprocess.run([config['ffmpeg'],
-                        '-ss', str(target['start_time'] - config['margin_before']),
-                        '-i', source,
-                        '-to', str(target['end_time'] + config['margin_after']),
-                        '-codec', 'copy',
-                        *loglevel,
-                        os.path.join(config['out_path'], filename)])
-
-    file_path = os.path.join(config['out_path'], 'files.txt')
-    with open(file_path, 'w') as f:
-        for filename in filenames:
-            f.write(f'file \'{filename}\'\n')
-
-    subprocess.run([config['ffmpeg'],
-                    '-f', 'concat',
-                    '-i', 'highlights/files.txt',
-                    '-c', 'copy',
-                    *loglevel,
-                    os.path.join(config["out_path"], video_name + '.mp4')])
-
-    os.remove(file_path)
-    for filename in filenames:
-        os.remove(os.path.join(config['out_path'], filename))

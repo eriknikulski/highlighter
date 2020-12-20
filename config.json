@@ -1,0 +1,13 @@
+{
+  "tmp_path": "tmp",
+  "out_path": "highlights",
+  "model_path": "models/saves/save_at_30.h5",
+  "min_slice": 30,
+  "slicing_percentage": 0.33333,
+  "min_single_kill_trigger": 7,
+  "min_multi_kill_trigger": 9,
+  "off_kill_limit": 5,
+  "margin_before": 3,
+  "margin_after": -4,
+  "cleanup": 1
+}
