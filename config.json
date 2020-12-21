@@ -1,5 +1,5 @@
 {
-  "tmp_path": "tmp",
+  "tmp_path": "",
   "out_path": "highlights",
   "model_path": "models/model.h5",
   "min_slice": 30,

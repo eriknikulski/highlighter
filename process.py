@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import tempfile
 
 import ffmpeg
 import numpy as np
@@ -90,6 +91,7 @@ def run(config):
 
 
 def cut_videos(targets, config):
+    tmp_dir = config['tmp_path'] if config['out_path'] else tempfile.mkdtemp()
     out_path = config['out_path']
     if os.path.isdir(os.path.join(out_path)):
         out_dir = out_path
@@ -111,13 +113,13 @@ def cut_videos(targets, config):
                 config['in_path'],
                 ss=str(target['start_time'] - config['margin_before']))
             .output(
-                os.path.join(config['tmp_path'], filename),
+                os.path.join(tmp_dir, filename),
                 t=str(target['end_time'] - target['start_time'] + config['margin_after']),
                 c='copy',
                 loglevel=loglevel)
             .run())
 
-    file_path = os.path.join(config['tmp_path'], 'files.txt')
+    file_path = os.path.join(tmp_dir, 'files.txt')
     with open(file_path, 'w') as f:
         for filename in filenames:
             f.write(f'file \'{filename}\'\n')
@@ -134,7 +136,7 @@ def cut_videos(targets, config):
 
     os.remove(file_path)
     for filename in filenames:
-        os.remove(os.path.join(config['tmp_path'], filename))
+        os.remove(os.path.join(tmp_dir, filename))
 
 
 def classify_video(config):
