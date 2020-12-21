@@ -111,20 +111,20 @@ def cut_videos(targets, config):
                 config['in_path'],
                 ss=str(target['start_time'] - config['margin_before']))
             .output(
-                os.path.join(out_dir, filename),
+                os.path.join(config['tmp_path'], filename),
                 t=str(target['end_time'] - target['start_time'] + config['margin_after']),
                 c='copy',
                 loglevel=loglevel)
             .run())
 
-    file_path = os.path.join(config['out_path'], 'files.txt')
+    file_path = os.path.join(config['tmp_path'], 'files.txt')
     with open(file_path, 'w') as f:
         for filename in filenames:
             f.write(f'file \'{filename}\'\n')
 
     (ffmpeg
         .input(
-            'highlights/files.txt',
+            os.path.join(config['tmp_path'], 'files.txt'),
             f='concat')
         .output(
             os.path.join(out_dir, basename + extension),
@@ -134,7 +134,7 @@ def cut_videos(targets, config):
 
     os.remove(file_path)
     for filename in filenames:
-        os.remove(os.path.join(config['out_path'], filename))
+        os.remove(os.path.join(config['tmp_path'], filename))
 
 
 def classify_video(config):
