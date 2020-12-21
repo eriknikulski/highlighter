@@ -82,7 +82,6 @@ def run(config):
     while True:
         in_frame = read_frame(process, width, height)
         if in_frame is None:
-            print('Something went wrong while reading the video!')
             break
         result.append(classifier.classify_image(in_frame, (width, height), model, config))
 
@@ -125,7 +124,7 @@ def cut_videos(targets, config):
 
     (ffmpeg
         .input(
-            os.path.join(config['tmp_path'], 'files.txt'),
+            file_path,
             f='concat')
         .output(
             os.path.join(out_dir, basename + extension),
