@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 
@@ -74,7 +75,7 @@ def read_frame(process, width, height):
 
 def run(config):
     result = []
-    model = keras.models.load_model(config['model_path'])
+    model = keras.models.load_model(os.path.join(config['model_path']))
     width, height = get_video_size(config['in_path'])
     process = read(config)
 
@@ -138,15 +139,24 @@ def cut_videos(targets, config):
 
 
 def classify_video(config):
-    print('Classifying video frames....')
-    classifications = run(config)
-    results = analyse(classifications, config)
+    if config['dict_path']:
+        with open(config['dict_path'], 'r', encoding='utf-8') as f:
+            results = json.load(f)
+    else:
+        print('Classifying video frames....')
+        classifications = run(config)
+        results = analyse(classifications, config)
 
     if config['verbose']:
         print('\n\n--------------------------------------------------------------------------------\n')
         for elem in results:
             print(elem)
         print('\n--------------------------------------------------------------------------------\n\n')
+
+    if config['to_dict']:
+        with open(config['to_dict'], 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=4)
+        return
 
     print('Cutting videos....')
     cut_videos(results, config)
