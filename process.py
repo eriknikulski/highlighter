@@ -45,11 +45,11 @@ def get_video_size(filename):
     return width, height
 
 
-def read(in_filename, config):
+def read(config):
     loglevel = 'warning' if not config['verbose'] else 'info'
     args = (
         ffmpeg
-        .input(in_filename)
+        .input(config['in_path'])
         .output('pipe:', r=1, format='rawvideo', pix_fmt='rgb24', loglevel=loglevel)
         .compile()
     )
@@ -72,11 +72,11 @@ def read_frame(process, width, height):
     return frame
 
 
-def run(video_name, config):
+def run(config):
     result = []
     model = keras.models.load_model(config['model_path'])
-    width, height = get_video_size(video_name)
-    process = read(video_name, config)
+    width, height = get_video_size(config['in_path'])
+    process = read(config)
 
     while True:
         in_frame = read_frame(process, width, height)
@@ -89,25 +89,29 @@ def run(video_name, config):
     return result
 
 
-def cut_videos(source, targets, config):
-    video_name = source[source.rfind('/') + 1:]
-    extension_point = video_name.rfind('.')
-    extension = video_name[extension_point:]
-    video_name = video_name[:extension_point]
+def cut_videos(targets, config):
+    out_path = config['out_path']
+    if os.path.isdir(os.path.join(out_path)):
+        out_dir = out_path
+        basename = os.path.basename(config['in_path'])
+        basename, extension = os.path.splitext(basename)
+    else:
+        out_dir, filename = os.path.split(out_path)
+        basename, extension = os.path.splitext(filename)
 
     filenames = []
     loglevel = 'fatal' if not config['verbose'] else 'info'
 
     for index, target in enumerate(targets):
-        filename = video_name + '_' + str(index) + extension
+        filename = basename + '_' + str(index) + extension
         filenames.append(filename)
 
         (ffmpeg
             .input(
-                source,
+                config['in_path'],
                 ss=str(target['start_time'] - config['margin_before']))
             .output(
-                os.path.join(config['out_path'], filename),
+                os.path.join(out_dir, filename),
                 t=str(target['end_time'] - target['start_time'] + config['margin_after']),
                 c='copy',
                 loglevel=loglevel)
@@ -123,9 +127,9 @@ def cut_videos(source, targets, config):
             'highlights/files.txt',
             f='concat')
         .output(
-           os.path.join(config['out_path'], video_name + '.mp4'),
-           c='copy',
-           loglevel=loglevel)
+            os.path.join(out_dir, basename + extension),
+            c='copy',
+            loglevel=loglevel)
         .run())
 
     os.remove(file_path)
@@ -133,9 +137,9 @@ def cut_videos(source, targets, config):
         os.remove(os.path.join(config['out_path'], filename))
 
 
-def classify_video(video_path, config):
+def classify_video(config):
     print('Classifying video frames....')
-    classifications = run(video_path, config)
+    classifications = run(config)
     results = analyse(classifications, config)
 
     if config['verbose']:
@@ -145,5 +149,5 @@ def classify_video(video_path, config):
         print('\n--------------------------------------------------------------------------------\n\n')
 
     print('Cutting videos....')
-    cut_videos(video_path, results, config)
+    cut_videos(results, config)
     print('Finished!')
