@@ -161,3 +161,34 @@ def classify_video(config):
     print('Cutting videos....')
     cut_videos(results, config)
     print('Finished!')
+
+
+def build_video(config):
+    if not os.path.isdir(config['in_path']):
+        raise ValueError('input is not a directory')
+    video_files = [f for f in os.listdir(config['in_path'])
+                   if os.path.isfile(os.path.join(config['in_path'], f)) and not f.startswith('.')]
+
+    video_files.sort()
+
+    if video_files:
+        file_path = os.path.join(config['in_path'], 'files.txt')
+        with open(file_path, 'w') as f:
+            for filename in video_files:
+                f.write(f'file \'{filename}\'\n')
+
+        loglevel = 'fatal' if not config['verbose'] else 'info'
+
+        (ffmpeg
+         .input(
+            file_path,
+            f='concat')
+         .output(
+            os.path.join(config['out_path']),
+            c='copy',
+            loglevel=loglevel)
+         .run())
+
+        os.remove(file_path)
+    else:
+        print('No files found')

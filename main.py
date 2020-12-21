@@ -22,7 +22,7 @@ parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', defa
                     help='if set outputs will be verbose')
 
 
-def classify(args):
+def build_config(args):
     with open(args.config) as f:
         config = json.load(f)
     config['verbose'] = args.verbose
@@ -44,8 +44,20 @@ def classify(args):
     basename = os.path.basename(config['in_path'])
     if basename == '':
         raise ValueError('input location needs to include filename')
+    return config
 
+
+def classify(args):
+    config = build_config(args)
     process.classify_video(config)
+
+
+def build(args):
+    config = build_config(args)
+    basename = os.path.basename(config['out_path'])
+    if basename == '':
+        raise ValueError('out location needs to include filename')
+    process.build_video(config)
 
 
 if __name__ == '__main__':
@@ -53,4 +65,4 @@ if __name__ == '__main__':
     if args.func == 'classify':
         classify(args)
     if args.func == 'build':
-        pass
+        build(args)
