@@ -7,7 +7,7 @@ import process
 parser = argparse.ArgumentParser(description='Highlighter for cs go clips.')
 parser.add_argument('func', choices=['classify', 'build'],
                     help='The function that should be executed. '
-                         'Choose either classify to extracts highlights from a given video clip or '
+                         'Choose either classify to extract highlights from a given video clip or '
                          'build to concatenates video clips in given folder.')
 parser.add_argument('-i', '--in_path', dest='in_path', required=True,
                     help='video file path for function classify, folder path for function build '

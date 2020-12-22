@@ -126,7 +126,7 @@ def cut_videos(targets, config):
 
     (ffmpeg
         .input(
-            file_path,
+            file_path.replace('\\', '/'),
             f='concat')
         .output(
             os.path.join(out_dir, basename + extension),
