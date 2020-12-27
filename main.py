@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import tempfile
 
 import process
 
@@ -31,32 +32,46 @@ def build_config(args):
 
     if not args.out_path:
         if 'out_path' not in config:
-            raise ValueError('no output location given. Ether specify in config or as argument with -o')
+            raise ValueError('no output location given. Either specify in config or as argument with -o')
     else:
         config['out_path'] = args.out_path
 
     if not args.in_path:
         if 'in_path' not in config:
-            raise ValueError('no output location given. Ether specify in config or as argument with -o')
+            raise ValueError('no output location given. Either specify in config or as argument with -o')
     else:
         config['in_path'] = args.in_path
 
-    basename = os.path.basename(config['in_path'])
-    if basename == '':
-        raise ValueError('input location needs to include filename')
+    if 'tmp_path' not in config:
+        config['tmp_path'] = tempfile.mkdtemp()
     return config
 
 
 def classify(args):
     config = build_config(args)
-    process.classify_video(config)
+
+    if os.path.isdir(config['in_path']):
+        video_files = [f for f in os.listdir(config['in_path'])
+                       if os.path.isfile(os.path.join(config['in_path'], f)) and not f.startswith('.')]
+        video_files.sort()
+
+        in_path = config['in_path']
+        out_path = config['out_path']
+        config['out_path'] = tempfile.mkdtemp()
+        for video in video_files:
+            config['in_path'] = os.path.join(in_path, video)
+            process.classify_video(config)
+        config['in_path'] = config['out_path']
+        config['out_path'] = out_path
+        process.build_video(config)
+    else:
+        process.classify_video(config)
 
 
 def build(args):
     config = build_config(args)
-    basename = os.path.basename(config['out_path'])
-    if basename == '':
-        raise ValueError('out location needs to include filename')
+    if not os.path.isdir(config['in_path']):
+        raise ValueError(f'{config.in_path} is not a valid directory')
     process.build_video(config)
 
 

@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import tempfile
 
 import ffmpeg
 import numpy as np
@@ -91,7 +90,10 @@ def run(config):
 
 
 def cut_videos(targets, config):
-    tmp_dir = config['tmp_path'] if config['out_path'] else tempfile.mkdtemp()
+    if not targets or targets == [None]:
+        print('No highlights in this clip')
+        return
+    tmp_dir = config['tmp_path']
     out_path = config['out_path']
     if os.path.isdir(os.path.join(out_path)):
         out_dir = out_path
@@ -127,10 +129,10 @@ def cut_videos(targets, config):
     (ffmpeg
         .input(
             file_path.replace('\\', '/'),
-            f='concat')
+            f='concat',
+            safe=0)
         .output(
             os.path.join(out_dir, basename + extension),
-            c='copy',
             loglevel=loglevel)
         .run())
 
@@ -183,7 +185,8 @@ def build_video(config):
         (ffmpeg
          .input(
             file_path,
-            f='concat')
+            f='concat',
+            safe=0)
          .output(
             os.path.join(config['out_path']),
             c='copy',
