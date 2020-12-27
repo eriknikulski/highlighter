@@ -15,7 +15,7 @@ parser.add_argument('-i', '--in_path', dest='in_path', required=True,
                          'from which highlights should be selected')
 parser.add_argument('-o', '--out_path', dest='out_path',
                     help='Path, with or without filename, to where highlights will be saved')
-parser.add_argument('-c', '--config', dest='config', required=True, help='config to run')
+parser.add_argument('-c', '--config', dest='config', default="config.json", help='config to run')
 parser.add_argument('-td', '--to-dict', dest='to_dict',
                     help='path to which highlights dict should be saved. Videos are not cut')
 parser.add_argument('-dp', '--dict-path', dest='dict_path', help='path to highlights dict')
