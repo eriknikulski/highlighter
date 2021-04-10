@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import uuid
 
 import ffmpeg
 import numpy as np
@@ -55,7 +56,13 @@ def read(config):
     args = (
         ffmpeg
         .input(config['in_path'])
-        .output('pipe:', r=1, format='rawvideo', pix_fmt='rgb24', loglevel=loglevel)
+        .output(
+            'pipe:',
+            r=1,
+            format='rawvideo',
+            pix_fmt='rgb24',
+            aspect='16:9',
+            loglevel=loglevel)
         .compile()
     )
     return subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -122,10 +129,11 @@ def cut_videos(targets, config):
                 os.path.join(tmp_dir, filename),
                 t=str(target['end_time'] - target['start_time'] + config['margin_after']),
                 c='copy',
+                aspect='16:9',
                 loglevel=loglevel)
             .run())
 
-    file_path = os.path.join(tmp_dir, 'files.txt')
+    file_path = os.path.join(tmp_dir, f'files_{str(uuid.uuid4())}.txt')
     with open(file_path, 'w') as f:
         for filename in filenames:
             f.write(f'file \'{filename}\'\n')

@@ -1,5 +1,6 @@
 import argparse
 import json
+from multiprocessing import Pool
 import os
 import tempfile
 
@@ -55,17 +56,24 @@ def classify(args):
                        if os.path.isfile(os.path.join(config['in_path'], f)) and not f.startswith('.')]
         video_files.sort()
 
-        in_path = config['in_path']
         out_path = config['out_path']
         config['out_path'] = tempfile.mkdtemp()
-        for video in video_files:
-            config['in_path'] = os.path.join(in_path, video)
-            process.classify_video(config)
+
+        with Pool(4) as p:
+            res = p.map_async(classify_single, zip(video_files, [config] * len(video_files)))
+            res.get()
+
         config['in_path'] = config['out_path']
         config['out_path'] = out_path
         process.build_video(config)
     else:
         process.classify_video(config)
+
+
+def classify_single(args):
+    video, config = args
+    config['in_path'] = os.path.join(config['in_path'], video)
+    process.classify_video(config)
 
 
 def build(args):
