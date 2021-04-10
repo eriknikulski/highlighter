@@ -34,7 +34,11 @@ def analyse(classifications, config):
                 count = 0
                 off_count = 0
             off_count += 1
-    results.append(last)
+    if last:
+        results.append(last)
+
+    if config['only_multi_kill']:
+        results = [result for result in results if result['type'] == 'multiple']
     return results
 
 

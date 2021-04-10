@@ -5,8 +5,9 @@
   "min_slice": 30,
   "slicing_percentage": 0.33333,
   "min_single_kill_trigger": 5,
-  "min_multi_kill_trigger": 9,
+  "min_multi_kill_trigger": 11,
   "off_kill_limit": 5,
+  "only_multi_kill": true,
   "margin_before": 3,
   "margin_after": -4
 }
